@@ -19,6 +19,11 @@ function authToken(req, res, next) {
   });
 }
 
+app.use('/register', createProxyMiddleware({
+  target: 'http://54.89.77.52:4000',
+  changeOrigin: true
+}));
+
 // 👇 Login (no auth needed)
 app.use('/login', createProxyMiddleware({
   target: 'http://54.89.77.52:4000',
