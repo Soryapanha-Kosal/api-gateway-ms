@@ -19,13 +19,15 @@ function authToken(req, res, next) {
   });
 }
 
-// 👇 FIX: Forward /auth/* to actual auth microservice (with pathRewrite!)
-app.use('/auth', createProxyMiddleware({
+app.use('/register', createProxyMiddleware({
   target: 'http://54.89.77.52:4000',
-  changeOrigin: true,
-  pathRewrite: {
-    '^/auth': ''  // 👈 strip "/auth" before forwarding
-  }
+  changeOrigin: true
+}));
+
+// 👇 Login (no auth needed)
+app.use('/login', createProxyMiddleware({
+  target: 'http://54.89.77.52:4000',
+  changeOrigin: true
 }));
 
 // 👇 Student (protected with JWT)
@@ -40,4 +42,4 @@ app.use('/teacher', authToken, createProxyMiddleware({
   changeOrigin: true
 }));
 
-app.listen(3000, () => console.log('✅ API Gateway running on port 3000'));
+app.listen(3000, () => console.log('API Gateway running on port 3000'));
