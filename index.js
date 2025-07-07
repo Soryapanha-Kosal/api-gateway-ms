@@ -8,7 +8,7 @@ const app = express();
 // JWT Middleware
 function authToken(req, res, next) {
   const header = req.headers.authorization;
-  const token = header && header.split(" ")[1];
+  const token = header && header.split(' ')[1];
   if (!token) return res.status(401).json("Missing token");
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
@@ -18,31 +18,25 @@ function authToken(req, res, next) {
   });
 }
 
-// =================== AUTH ROUTES ===================
+// ✅ AUTH ROUTES
 app.use('/auth', createProxyMiddleware({
   target: 'http://54.89.77.52:4000',
   changeOrigin: true,
-  pathRewrite: {
-    '^/auth': '',
-  },
+  pathRewrite: { '^/auth': '' }, // keeps /register & /login routes intact
 }));
 
-// =================== STUDENT ROUTES ===================
+// ✅ STUDENT ROUTES (Protected)
 app.use('/student', authToken, createProxyMiddleware({
   target: 'http://54.91.176.127:3001',
   changeOrigin: true,
-  // ⚠️ DO NOT remove /student prefix if the microservice uses it
-  // Remove pathRewrite unless you're 100% sure you don't need the prefix
+  pathRewrite: { '^/student': '' }, // <–– This line fixes the route
 }));
 
-// =================== TEACHER ROUTES ===================
+// ✅ TEACHER ROUTES (Protected)
 app.use('/teacher', authToken, createProxyMiddleware({
   target: 'http://98.80.15.4:3002',
   changeOrigin: true,
+  pathRewrite: { '^/teacher': '' }, // <–– And this too, for teacher
 }));
 
-// Start server
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`✅ API Gateway running on port ${PORT}`);
-});
+app.listen(3000, () => console.log('✅ API Gateway running on port 3000'));
