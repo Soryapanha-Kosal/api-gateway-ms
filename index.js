@@ -21,7 +21,7 @@ function authToken(req, res, next) {
 
 // 👇 Login (no auth needed)
 app.use('/login', createProxyMiddleware({
-  target: 'http://<AUTH_EC2_PUBLIC_IP>:4000',
+  target: 'http://54.89.77.52:4000',
   changeOrigin: true
 }));
 
