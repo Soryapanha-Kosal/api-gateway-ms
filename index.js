@@ -18,36 +18,31 @@ function authToken(req, res, next) {
   });
 }
 
-// =================== 🔐 AUTH ROUTES ===================
-// Forward /auth/login and /auth/register to Auth MS
+// =================== AUTH ROUTES ===================
 app.use('/auth', createProxyMiddleware({
-  target: 'http://54.89.77.52:4000',  // Replace with Auth-MS public IP
+  target: 'http://54.89.77.52:4000',
   changeOrigin: true,
   pathRewrite: {
-    '^/auth': '', // remove /auth prefix when forwarding
+    '^/auth': '',
   },
 }));
 
-// =================== 🎓 STUDENT ROUTES ===================
-// Protected routes to Student-MS
+// =================== STUDENT ROUTES ===================
 app.use('/student', authToken, createProxyMiddleware({
-  target: 'http://54.91.176.127:3001', // Replace with Student-MS public IP
+  target: 'http://54.91.176.127:3001',
   changeOrigin: true,
-  pathRewrite: {
-    '^/student': '', // remove /student prefix
-  },
+  // ⚠️ DO NOT remove /student prefix if the microservice uses it
+  // Remove pathRewrite unless you're 100% sure you don't need the prefix
 }));
 
-// =================== 🧑‍🏫 TEACHER ROUTES ===================
-// Protected routes to Teacher-MS
+// =================== TEACHER ROUTES ===================
 app.use('/teacher', authToken, createProxyMiddleware({
-  target: 'http://98.80.15.4:3002', // Replace with Teacher-MS public IP
+  target: 'http://98.80.15.4:3002',
   changeOrigin: true,
-  pathRewrite: {
-    '^/teacher': '', // remove /teacher prefix
-  },
 }));
 
-// Start Gateway
+// Start server
 const PORT = 3000;
-app.listen(PORT, () => console.log(`✅ API Gateway running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`✅ API Gateway running on port ${PORT}`);
+});
