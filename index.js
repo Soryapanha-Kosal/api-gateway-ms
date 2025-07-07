@@ -19,27 +19,25 @@ function authToken(req, res, next) {
   });
 }
 
-app.use('/register', createProxyMiddleware({
-  target: 'http://54.89.77.52:4000',
-  changeOrigin: true
+// 👇 Proxy all /auth/* routes to AUTH MS
+app.use('/auth', createProxyMiddleware({
+  target: 'http://54.89.77.52:4000', // <-- Your auth-ms EC2 public IP
+  changeOrigin: true,
+  pathRewrite: {
+    '^/auth': '', // remove "/auth" before forwarding
+  },
 }));
 
-// 👇 Login (no auth needed)
-app.use('/login', createProxyMiddleware({
-  target: 'http://54.89.77.52:4000',
-  changeOrigin: true
-}));
-
-// 👇 Student (protected with JWT)
+// 👇 Proxy /student/* routes (protected)
 app.use('/student', authToken, createProxyMiddleware({
-  target: 'http://54.91.176.127:3001',
-  changeOrigin: true
+  target: 'http://54.91.176.127:3001', // your student-ms IP
+  changeOrigin: true,
 }));
 
-// 👇 Teacher (protected with JWT)
+// 👇 Proxy /teacher/* routes (protected)
 app.use('/teacher', authToken, createProxyMiddleware({
-  target: 'http://98.80.15.4:3002',
-  changeOrigin: true
+  target: 'http://98.80.15.4:3002', // your teacher-ms IP
+  changeOrigin: true,
 }));
 
-app.listen(3000, () => console.log('API Gateway running on port 3000'));
+app.listen(3000, () => console.log('✅ API Gateway running on port 3000'));
