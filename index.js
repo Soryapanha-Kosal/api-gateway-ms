@@ -6,7 +6,7 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-// Middleware to verify JWT
+// JWT Middleware
 function authToken(req, res, next) {
   const header = req.headers.authorization;
   const token = header && header.split(" ")[1];
@@ -19,27 +19,26 @@ function authToken(req, res, next) {
   });
 }
 
-app.use('/register', createProxyMiddleware({
+// 👇 Auth Service: expects /auth/register and /auth/login
+app.use('/auth', createProxyMiddleware({
   target: 'http://54.89.77.52:4000',
-  changeOrigin: true
+  changeOrigin: true,
 }));
 
-// 👇 Login (no auth needed)
-app.use('/login', createProxyMiddleware({
-  target: 'http://54.89.77.52:4000',
-  changeOrigin: true
-}));
-
-// 👇 Student (protected with JWT)
+// 👇 Student (protected)
 app.use('/student', authToken, createProxyMiddleware({
   target: 'http://54.91.176.127:3001',
-  changeOrigin: true
+  changeOrigin: true,
+  pathRewrite: { '^/student': '' }
 }));
 
-// 👇 Teacher (protected with JWT)
+// 👇 Teacher (protected)
 app.use('/teacher', authToken, createProxyMiddleware({
   target: 'http://98.80.15.4:3002',
-  changeOrigin: true
+  changeOrigin: true,
+  pathRewrite: { '^/teacher': '' }
 }));
 
-app.listen(3000, () => console.log('API Gateway running on port 3000'));
+app.listen(3000, () => {
+  console.log('✅ API Gateway running on port 3000');
+});
