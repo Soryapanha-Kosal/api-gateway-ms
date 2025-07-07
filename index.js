@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const app = express();
 
-// Middleware to verify JWT
+// JWT Middleware
 function authToken(req, res, next) {
   const header = req.headers.authorization;
   const token = header && header.split(" ")[1];
@@ -18,25 +18,36 @@ function authToken(req, res, next) {
   });
 }
 
-// 👇 Proxy all /auth/* routes to AUTH MS
+// =================== 🔐 AUTH ROUTES ===================
+// Forward /auth/login and /auth/register to Auth MS
 app.use('/auth', createProxyMiddleware({
-  target: 'http://54.89.77.52:4000', // <-- Your auth-ms EC2 public IP
+  target: 'http://54.89.77.52:4000',  // Replace with Auth-MS public IP
   changeOrigin: true,
   pathRewrite: {
-    '^/auth': '', // remove "/auth" before forwarding
+    '^/auth': '', // remove /auth prefix when forwarding
   },
 }));
 
-// 👇 Proxy /student/* routes (protected)
+// =================== 🎓 STUDENT ROUTES ===================
+// Protected routes to Student-MS
 app.use('/student', authToken, createProxyMiddleware({
-  target: 'http://54.91.176.127:3001', // your student-ms IP
+  target: 'http://54.91.176.127:3001', // Replace with Student-MS public IP
   changeOrigin: true,
+  pathRewrite: {
+    '^/student': '', // remove /student prefix
+  },
 }));
 
-// 👇 Proxy /teacher/* routes (protected)
+// =================== 🧑‍🏫 TEACHER ROUTES ===================
+// Protected routes to Teacher-MS
 app.use('/teacher', authToken, createProxyMiddleware({
-  target: 'http://98.80.15.4:3002', // your teacher-ms IP
+  target: 'http://98.80.15.4:3002', // Replace with Teacher-MS public IP
   changeOrigin: true,
+  pathRewrite: {
+    '^/teacher': '', // remove /teacher prefix
+  },
 }));
 
-app.listen(3000, () => console.log('✅ API Gateway running on port 3000'));
+// Start Gateway
+const PORT = 3000;
+app.listen(PORT, () => console.log(`✅ API Gateway running on port ${PORT}`));
